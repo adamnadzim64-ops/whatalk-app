@@ -27,11 +27,25 @@ jobs:
       - name: Siapkan Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Periksa struktur proyek
+        shell: bash
+        run: |
+          echo "=== DAFTAR FILE ==="
+          ls -la
+          echo "=== FILE GRADLE ==="
+          find . -maxdepth 5 \( \
+            -name gradlew -o \
+            -name settings.gradle -o \
+            -name settings.gradle.kts -o \
+            -name build.gradle -o \
+            -name build.gradle.kts \
+          \) -print
+
       - name: Buat debug keystore
+        shell: bash
         run: |
           keytool -genkeypair \
-            -v \
-            -keystore "$GITHUB_WORKSPACE/debug.keystore" \
+            -keystore "$RUNNER_TEMP/debug.keystore" \
             -storepass android \
             -alias androiddebugkey \
             -keypass android \
@@ -40,27 +54,34 @@ jobs:
             -validity 10000 \
             -dname "CN=Android Debug,O=Android,C=US"
 
-      - name: Periksa struktur proyek
-        run: |
-          echo "=== Struktur proyek ==="
-          find . -maxdepth 3 \( \
-            -name "gradlew" -o \
-            -name "settings.gradle" -o \
-            -name "settings.gradle.kts" -o \
-            -name "build.gradle" -o \
-            -name "build.gradle.kts" \
-          \) -print
-
       - name: Build APK
+        shell: bash
         run: |
-          chmod +x gradlew
+          set -e
 
-          ./gradlew assembleDebug \
-            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/debug.keystore" \
-            -Pandroid.injected.signing.store.password=android \
-            -Pandroid.injected.signing.key.alias=androiddebugkey \
-            -Pandroid.injected.signing.key.password=android \
-            --stacktrace
+          WRAPPER="$(find . -type f -name gradlew -print -quit)"
+
+          if [ -n "$WRAPPER" ]; then
+            chmod +x "$WRAPPER"
+            PROJECT_DIR="$(dirname "$WRAPPER")"
+            cd "$PROJECT_DIR"
+            ./gradlew assembleDebug \
+              -Pandroid.injected.signing.store.file="$RUNNER_TEMP/debug.keystore" \
+              -Pandroid.injected.signing.store.password=android \
+              -Pandroid.injected.signing.key.alias=androiddebugkey \
+              -Pandroid.injected.signing.key.password=android \
+              --stacktrace
+          elif [ -f settings.gradle.kts ] || [ -f settings.gradle ]; then
+            gradle assembleDebug \
+              -Pandroid.injected.signing.store.file="$RUNNER_TEMP/debug.keystore" \
+              -Pandroid.injected.signing.store.password=android \
+              -Pandroid.injected.signing.key.alias=androiddebugkey \
+              -Pandroid.injected.signing.key.password=android \
+              --stacktrace
+          else
+            echo "ERROR: Gradle project tidak ditemukan di folder utama."
+            exit 1
+          fi
 
       - name: Upload APK
         if: success()

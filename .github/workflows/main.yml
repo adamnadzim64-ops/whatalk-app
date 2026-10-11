@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   build:
+    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
@@ -26,26 +27,40 @@ jobs:
       - name: Siapkan Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Cari file Gradle
+      - name: Buat debug keystore
         run: |
-          echo "Mencari file project..."
-          find . -maxdepth 4 \( -name "gradlew" -o -name "settings.gradle" -o -name "settings.gradle.kts" -o -name "build.gradle" -o -name "build.gradle.kts" \) -print
+          keytool -genkeypair \
+            -v \
+            -keystore "$GITHUB_WORKSPACE/debug.keystore" \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+
+      - name: Periksa struktur proyek
+        run: |
+          echo "=== Struktur proyek ==="
+          find . -maxdepth 3 \( \
+            -name "gradlew" -o \
+            -name "settings.gradle" -o \
+            -name "settings.gradle.kts" -o \
+            -name "build.gradle" -o \
+            -name "build.gradle.kts" \
+          \) -print
 
       - name: Build APK
         run: |
-          if [ -f gradlew ]; then
-            chmod +x gradlew
-            ./gradlew assembleDebug
-          elif [ -f app/gradlew ]; then
-            cd app
-            chmod +x gradlew
-            ./gradlew assembleDebug
-          elif [ -f app/build.gradle.kts ] || [ -f app/build.gradle ]; then
-            gradle -p app assembleDebug
-          else
-            echo "File Gradle tidak ditemukan di lokasi yang diharapkan."
-            exit 1
-          fi
+          chmod +x gradlew
+
+          ./gradlew assembleDebug \
+            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/debug.keystore" \
+            -Pandroid.injected.signing.store.password=android \
+            -Pandroid.injected.signing.key.alias=androiddebugkey \
+            -Pandroid.injected.signing.key.password=android \
+            --stacktrace
 
       - name: Upload APK
         if: success()

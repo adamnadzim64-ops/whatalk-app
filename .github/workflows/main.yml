@@ -11,30 +11,45 @@ permissions:
 
 jobs:
   build:
+    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Ambil kode WhaTalk
+      - name: Download repository
         uses: actions/checkout@v4
 
-      - name: Siapkan Java
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Siapkan Gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Beri izin Gradle
-        run: chmod +x gradlew
+      - name: Grant Gradle permission
+        run: |
+          if [ -f ./gradlew ]; then
+            chmod +x ./gradlew
+          fi
 
-      - name: Build APK Debug
-        run: ./gradlew assembleDebug
+      - name: Build APK
+        run: |
+          if [ -f ./gradlew ]; then
+            ./gradlew assembleDebug
+          elif [ -f ./build.gradle.kts ] || [ -f ./build.gradle ]; then
+            gradle assembleDebug
+          else
+            echo "ERROR: Gradle build file or gradlew was not found."
+            exit 1
+          fi
 
-      - name: Simpan APK
+      - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: WhaTalk-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: |
+            **/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+          retention-days: 7

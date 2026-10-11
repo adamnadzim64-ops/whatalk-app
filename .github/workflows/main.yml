@@ -11,45 +11,48 @@ permissions:
 
 jobs:
   build:
-    name: Build Android APK
+    name: Build WhaTalk APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download repository
+      - name: Ambil kode WhaTalk
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Siapkan Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Gradle
+      - name: Siapkan Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Grant Gradle permission
+      - name: Buat debug keystore
         run: |
-          if [ -f ./gradlew ]; then
-            chmod +x ./gradlew
-          fi
+          keytool -genkeypair \
+            -v \
+            -keystore debug.keystore \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+
+      - name: Periksa Gradle
+        run: |
+          chmod +x gradlew
+          ./gradlew --version
 
       - name: Build APK
-        run: |
-          if [ -f ./gradlew ]; then
-            ./gradlew assembleDebug
-          elif [ -f ./build.gradle.kts ] || [ -f ./build.gradle ]; then
-            gradle assembleDebug
-          else
-            echo "ERROR: Gradle build file or gradlew was not found."
-            exit 1
-          fi
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: WhaTalk-APK
-          path: |
-            **/build/outputs/apk/debug/*.apk
+          path: '**/build/outputs/apk/debug/*.apk'
           if-no-files-found: error
           retention-days: 7

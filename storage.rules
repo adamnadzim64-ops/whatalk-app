@@ -1,0 +1,48 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidMediaSize(maxBytes) {
+      return request.resource.size > 0 && request.resource.size <= maxBytes;
+    }
+
+    // 1. Foto Profil Pengguna (/avatars/{userId}/{fileName})
+    match /avatars/{userId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() &&
+                      request.auth.uid == userId &&
+                      isValidMediaSize(2 * 1024 * 1024) &&
+                      request.resource.contentType.matches('image/.*');
+    }
+
+    // 2. Media Percakapan (/conversations/{conversationId}/{senderId}/{fileName})
+    match /conversations/{conversationId}/{senderId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() &&
+                      request.auth.uid == senderId &&
+                      isValidMediaSize(15 * 1024 * 1024) &&
+                      (request.resource.contentType.matches('image/.*') ||
+                       request.resource.contentType.matches('video/.*') ||
+                       request.resource.contentType.matches('audio/.*') ||
+                       request.resource.contentType.matches('application/pdf'));
+    }
+
+    // 3. Media Status 24 Jam (/statuses/{authorId}/{fileName})
+    match /statuses/{authorId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() &&
+                      request.auth.uid == authorId &&
+                      isValidMediaSize(10 * 1024 * 1024) &&
+                      (request.resource.contentType.matches('image/.*') ||
+                       request.resource.contentType.matches('video/.*'));
+    }
+
+    // Default deny untuk seluruh path lainnya
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

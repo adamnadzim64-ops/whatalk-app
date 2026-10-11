@@ -1,0 +1,6 @@
+{
+  "name": "WhaTalk",
+  "description": "Aplikasi pesan instan real-time dengan chat pribadi, status 24 jam, grup, komunitas, dan panggilan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

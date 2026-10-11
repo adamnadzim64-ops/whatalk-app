@@ -1,0 +1,244 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Public WhaTalk profile searchable by username without exposing private PII.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Firebase Auth UID of the user." },
+        "username": { "type": "string", "description": "Unique lowercase username." },
+        "displayName": { "type": "string", "description": "Display name shown in chats." },
+        "bio": { "type": "string", "description": "User status/about bio." },
+        "avatarData": { "type": "string", "description": "Avatar URL or compressed data URI." },
+        "isOnline": { "type": "boolean", "description": "Whether the user is currently online." },
+        "lastSeenText": { "type": "string", "description": "Formatted last seen status." },
+        "isDiscoverable": { "type": "boolean", "description": "Allows contact lookup by username." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp of creation." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp of last update." }
+      },
+      "required": ["userId", "username", "displayName", "bio", "avatarData", "isOnline", "lastSeenText", "isDiscoverable", "createdAt", "updatedAt"]
+    },
+    "UserSettings": {
+      "title": "UserSettings",
+      "description": "Private user settings, privacy controls, and private account identifiers.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "email": { "type": "string" },
+        "privacyPhoto": { "type": "string", "enum": ["EVERYONE", "CONTACTS", "NOBODY"] },
+        "privacyBio": { "type": "string", "enum": ["EVERYONE", "CONTACTS", "NOBODY"] },
+        "privacyLastSeen": { "type": "string", "enum": ["EVERYONE", "CONTACTS", "NOBODY"] },
+        "privacyOnline": { "type": "string", "enum": ["EVERYONE", "SAME_AS_LAST_SEEN"] },
+        "privacyStatus": { "type": "string", "enum": ["CONTACTS", "PUBLIC", "PRIVATE"] },
+        "readReceipts": { "type": "boolean" },
+        "themeMode": { "type": "string", "enum": ["SYSTEM", "LIGHT", "DARK"] },
+        "wallpaperHex": { "type": "string" },
+        "fontScale": { "type": "string", "enum": ["SMALL", "MEDIUM", "LARGE"] },
+        "notificationsEnabled": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "phoneNumber", "email", "privacyPhoto", "privacyBio", "privacyLastSeen", "privacyOnline", "privacyStatus", "readReceipts", "themeMode", "wallpaperHex", "fontScale", "notificationsEnabled", "createdAt", "updatedAt"]
+    },
+    "Contact": {
+      "title": "Contact",
+      "description": "Saved contact entry owned by a user.",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string" },
+        "contactUid": { "type": "string" },
+        "contactUsername": { "type": "string" },
+        "contactDisplayName": { "type": "string" },
+        "contactBio": { "type": "string" },
+        "contactAvatarData": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ownerId", "contactUid", "contactUsername", "contactDisplayName", "contactBio", "contactAvatarData", "createdAt", "updatedAt"]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "Private 1-on-1 or group chat conversation metadata.",
+      "type": "object",
+      "properties": {
+        "creatorId": { "type": "string" },
+        "memberUids": { "type": "array" },
+        "adminUids": { "type": "array" },
+        "isGroup": { "type": "boolean" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "avatarData": { "type": "string" },
+        "communityId": { "type": "string" },
+        "inviteCode": { "type": "string" },
+        "lastMessageText": { "type": "string" },
+        "lastMessageSenderId": { "type": "string" },
+        "lastMessageStatus": { "type": "string", "enum": ["SENT", "DELIVERED", "READ"] },
+        "typingUserId": { "type": "string" },
+        "pinnedByUids": { "type": "array" },
+        "archivedByUids": { "type": "array" },
+        "mutedByUids": { "type": "array" },
+        "unreadCount": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["creatorId", "memberUids", "adminUids", "isGroup", "title", "description", "avatarData", "communityId", "inviteCode", "lastMessageText", "lastMessageSenderId", "lastMessageStatus", "typingUserId", "pinnedByUids", "archivedByUids", "mutedByUids", "unreadCount", "createdAt", "updatedAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Individual chat message in a conversation.",
+      "type": "object",
+      "properties": {
+        "conversationId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "memberUids": { "type": "array" },
+        "text": { "type": "string" },
+        "messageType": { "type": "string", "enum": ["TEXT", "IMAGE", "VIDEO", "DOCUMENT", "VOICE", "LOCATION"] },
+        "mediaData": { "type": "string" },
+        "mediaCaption": { "type": "string" },
+        "replyToMessageId": { "type": "string" },
+        "replyToSenderName": { "type": "string" },
+        "replyToText": { "type": "string" },
+        "isForwarded": { "type": "boolean" },
+        "isEdited": { "type": "boolean" },
+        "isDeleted": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["SENT", "DELIVERED", "READ"] },
+        "reactionsSummary": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["conversationId", "senderId", "senderName", "memberUids", "text", "messageType", "mediaData", "mediaCaption", "replyToMessageId", "replyToSenderName", "replyToText", "isForwarded", "isEdited", "isDeleted", "status", "reactionsSummary", "createdAt", "updatedAt"]
+    },
+    "Community": {
+      "title": "Community",
+      "description": "WhaTalk Community grouping multiple related chat groups.",
+      "type": "object",
+      "properties": {
+        "creatorId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "inviteCode": { "type": "string" },
+        "memberUids": { "type": "array" },
+        "groupIds": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["creatorId", "name", "description", "inviteCode", "memberUids", "groupIds", "createdAt", "updatedAt"]
+    },
+    "StatusPost": {
+      "title": "StatusPost",
+      "description": "24-hour ephemeral status update (text, image, or short video).",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorAvatarData": { "type": "string" },
+        "statusType": { "type": "string", "enum": ["TEXT", "IMAGE", "VIDEO"] },
+        "contentText": { "type": "string" },
+        "mediaData": { "type": "string" },
+        "backgroundColorHex": { "type": "string" },
+        "privacyMode": { "type": "string", "enum": ["CONTACTS", "PUBLIC", "PRIVATE"] },
+        "visibleToUids": { "type": "array" },
+        "viewerUids": { "type": "array" },
+        "expiresAtMillis": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["authorId", "authorName", "authorAvatarData", "statusType", "contentText", "mediaData", "backgroundColorHex", "privacyMode", "visibleToUids", "viewerUids", "expiresAtMillis", "createdAt", "updatedAt"]
+    },
+    "CallLog": {
+      "title": "CallLog",
+      "description": "Voice/video call signaling and call history record.",
+      "type": "object",
+      "properties": {
+        "callerId": { "type": "string" },
+        "callerName": { "type": "string" },
+        "receiverId": { "type": "string" },
+        "receiverName": { "type": "string" },
+        "participantUids": { "type": "array" },
+        "callType": { "type": "string", "enum": ["VOICE", "VIDEO"] },
+        "callState": { "type": "string", "enum": ["RINGING", "CONNECTED", "ENDED", "REJECTED", "MISSED"] },
+        "durationSeconds": { "type": "integer" },
+        "sdpOffer": { "type": "string" },
+        "sdpAnswer": { "type": "string" },
+        "iceCandidatesInfo": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["callerId", "callerName", "receiverId", "receiverName", "participantUids", "callType", "callState", "durationSeconds", "sdpOffer", "sdpAnswer", "iceCandidatesInfo", "createdAt", "updatedAt"]
+    },
+    "BlockedUser": {
+      "title": "BlockedUser",
+      "description": "Blocked user record owned by a specific user.",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string" },
+        "blockedUid": { "type": "string" },
+        "blockedUsername": { "type": "string" },
+        "blockedDisplayName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ownerId", "blockedUid", "blockedUsername", "blockedDisplayName", "createdAt", "updatedAt"]
+    },
+    "AbuseReport": {
+      "title": "AbuseReport",
+      "description": "Account or message report submitted by a user.",
+      "type": "object",
+      "properties": {
+        "reporterId": { "type": "string" },
+        "reportedUid": { "type": "string" },
+        "reportedUsername": { "type": "string" },
+        "reason": { "type": "string" },
+        "details": { "type": "string" },
+        "status": { "type": "string", "enum": ["SUBMITTED"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["reporterId", "reportedUid", "reportedUsername", "reason", "details", "status", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Public user profiles."
+    },
+    "/userSettings/{userId}": {
+      "schema": { "$ref": "#/entities/UserSettings" },
+      "description": "Private user settings and PII."
+    },
+    "/contacts/{contactId}": {
+      "schema": { "$ref": "#/entities/Contact" },
+      "description": "User contacts."
+    },
+    "/conversations/{conversationId}": {
+      "schema": { "$ref": "#/entities/Conversation" },
+      "description": "Private and group conversations."
+    },
+    "/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/Message" },
+      "description": "Real-time chat messages."
+    },
+    "/communities/{communityId}": {
+      "schema": { "$ref": "#/entities/Community" },
+      "description": "Communities containing groups."
+    },
+    "/statuses/{statusId}": {
+      "schema": { "$ref": "#/entities/StatusPost" },
+      "description": "24-hour status posts."
+    },
+    "/calls/{callId}": {
+      "schema": { "$ref": "#/entities/CallLog" },
+      "description": "WebRTC call signaling and call history."
+    },
+    "/blockedUsers/{blockId}": {
+      "schema": { "$ref": "#/entities/BlockedUser" },
+      "description": "Blocked user list."
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/AbuseReport" },
+      "description": "Abuse reports."
+    }
+  }
+}
